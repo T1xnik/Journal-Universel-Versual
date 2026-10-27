@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Сборка
+build/
+dist/
+installer_output/
+
+# Локальные данные и секреты — никогда не коммитить
+.env
+*.log
+auth.json
+profile.json
+*_cache.json
+settings.json
+
+# IDE / ОС
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
