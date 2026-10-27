@@ -1,9 +1,9 @@
 
 # -*- coding: utf-8 -*-
 """
-StudentHub — неофициальный настольный клиент электронного журнала TOP Academy.
+StudentHub — неофициальный настольный клиент электронного журнала вашего учебного заведения.
 Расписание, домашние задания, оценки, рейтинг группы и профиль в одном окне.
-Не связан с TOP Academy / IT Step; использует публичный API журнала под вашей учётной записью.
+Не связан с администрацией журнала; использует публичный API журнала под вашей учётной записью.
 """
 import asyncio
 import json
@@ -50,6 +50,12 @@ if APP_KEY_OVERRIDE and HAS_API:
         _api_auth.APP_KEY = APP_KEY_OVERRIDE
     except Exception:
         pass
+
+# [MOD] Универсальность: домены журнала переопределяются переменными окружения,
+# чтобы клиент работал с журналом любого учебного заведения, а не только одного.
+API_BASE    = os.environ.get("STUDENTHUB_API_BASE", "").strip()     # напр. https://msapi.example.edu/api/v2
+FS_BASE     = os.environ.get("STUDENTHUB_FS_BASE", "").strip() or "https://fs.top-academy.ru"
+WEB_ORIGIN  = os.environ.get("STUDENTHUB_WEB_ORIGIN", "").strip()   # напр. https://journal.example.edu
 
 # ### --- СЕКЦИЯ КОНФИГУРАЦИИ И ПУТЕЙ --- ###
 def app_dir() -> Path:
@@ -651,8 +657,14 @@ class ApiBridge(QObject):
     async def _get_client(self):
         if self._client is not None:
             return self._client
-        self._ctx = TopAcademyClient()
+        self._ctx = TopAcademyClient(base_url=API_BASE) if API_BASE else TopAcademyClient()
         self._client = await self._ctx.__aenter__()
+        if WEB_ORIGIN:
+            # В SDK Origin/Referer прибиты к домену одного журнала — для другого подменяем
+            self._client._client.headers.update({
+                "origin": WEB_ORIGIN,
+                "referer": WEB_ORIGIN.rstrip("/") + "/",
+            })
         return self._client
 
     async def _close_client(self):
@@ -1445,7 +1457,7 @@ class SchedulePage(_WeekBase):
         if self._api_mode():
             total = self._fill_api()
             self.group_lbl.setText(f"Моя группа: {gname}" if gname else "Моя группа")
-            self.sub_lbl.setText("Расписание из TOP Academy")
+            self.sub_lbl.setText("Расписание из журнала")
         else:
             g = GROUP_BY_ID[DEFAULT_MINE_ID]
             total = self._fill_manual(DEFAULT_MINE_ID)
@@ -1673,7 +1685,7 @@ HW_IMG_EXT = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp")
 
 def hw_abs_url(path):
     path = (path or "").strip()
-    return path if path.startswith(("http://", "https://", "data:")) else f"https://fs.top-academy.ru/{path.lstrip('/')}"
+    return path if path.startswith(("http://", "https://", "data:")) else f"{FS_BASE}/{path.lstrip('/')}"
 
 def hw_image_sources(it):
     """Картинки, прикреплённые преподавателем: файл задания-картинка и <img> в описании/комментарии."""
@@ -2160,7 +2172,7 @@ class HomeworkPage(QWidget):
         HwTextDialog(self, title, "\n\n".join(parts) or "Преподаватель не оставил комментария.").exec()
 
     def download(self, path, filename=""):
-        url = path if path.startswith("http") else f"https://fs.top-academy.ru/{path.lstrip('/')}"
+        url = path if path.startswith("http") else f"{FS_BASE}/{path.lstrip('/')}"
         asyncio.ensure_future(self._save_file(url, filename))
 
     async def _save_file(self, url, filename):

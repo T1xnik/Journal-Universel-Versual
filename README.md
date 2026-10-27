@@ -2,7 +2,7 @@
 
 # 🎓 StudentHub
 
-**Неофициальный настольный клиент электронного журнала TOP Academy**<br>
+**Неофициальный настольный клиент электронного журнала вашего учебного заведения**<br>
 Расписание · домашние задания · оценки · рейтинг группы · профиль — в одном окне
 
 ![Python](https://img.shields.io/badge/Python-3.11–3.14-3776AB?logo=python&logoColor=white)
@@ -14,7 +14,7 @@
 </div>
 
 > [!IMPORTANT]
-> Проект **не связан с TOP Academy / IT Step** и не одобрен ими. Приложение работает под *вашей* учётной записью через публичный API журнала. Используйте на свой риск и в рамках правил вашего учебного заведения. Все названия и товарные знаки принадлежат их владельцам.
+> Проект **неофициальный**: он не связан с администрацией журнала, не одобрен ею и не претендует на её товарные знаки. Приложение работает под *вашей* учётной записью через публичный API вашего журнала. Используйте на свой риск и в рамках правил вашего учебного заведения.
 
 ## ВАЖНО: API-КЛЮЧ ЖУРНАЛА
 
@@ -22,8 +22,8 @@
 
 **БЕЗ НЕГО ЛЮБОЙ ЗАПРОС К ЖУРНАЛУ ВОЗВРАЩАЕТ ОШИБКУ АВТОРИЗАЦИИ, ДАЖЕ С ВЕРНЫМ ЛОГИНОМ И ПАРОЛЕМ.**
 
-**ПО УМОЛЧАНИЮ КЛЮЧ УЖЕ ВШИТ** в `StudentHub/vendor/ittop_academy_api-0.0.6-py3-none-any.whl`
-(`top_academy_api/config.py` → `APP_KEY`), поэтому обычно вставлять ничего не нужно: ввели логин и пароль — работаем.
+**ПО УМОЛЧАНИЮ КЛЮЧ УЖЕ ВШИТ** в вендорный SDK (`StudentHub/vendor/*.whl`, файл `config.py` → `APP_KEY`),
+поэтому обычно вставлять ничего не нужно: ввели логин и пароль — работаем.
 
 **НО ЕСЛИ ВХОД НЕ ПРОХОДИТ** — ошибка авторизации, 401, «неверный логин или пароль», хотя пароль точно верный —
 ключ устарел, отозван, или у вашего учебного заведения он свой.
@@ -46,7 +46,7 @@ python StudentHub.pyw
 
 **ГДЕ ВЗЯТЬ КЛЮЧ:**
 
-1. Откройте [journal.top-academy.ru](https://journal.top-academy.ru/) и войдите в свой аккаунт.
+1. Откройте сайт журнала вашего учебного заведения и войдите в свой аккаунт.
 2. Нажмите `F12` → вкладка **Network** (Сеть).
 3. Войдите ещё раз или обновите страницу — найдите запрос `POST .../api/v2/auth/login`.
 4. Откройте его, в теле запроса (Payload / Request) найдите поле **`application_key`**.
@@ -251,6 +251,27 @@ python StudentHub.pyw
 | Свои локальные группы | `SCHEDULE_MINE` и `GROUPS_JSON` в `StudentHub.pyw` (5 дней × 5 пар, пара = `[предмет, аудитория, преподаватель]`) |
 | Папка с данными | `%LOCALAPPDATA%\StudentHub` (на других ОС — домашняя папка пользователя) |
 
+### Подключение к журналу другого учебного заведения
+
+Клиент универсальный: домены журнала задаются переменными окружения.
+
+| Переменная | Что задаёт | Пример |
+|---|---|---|
+| `STUDENTHUB_API_BASE` | адрес API журнала (без `/` на конце) | `https://api.example.edu/api/v2` |
+| `STUDENTHUB_FS_BASE` | хранилище файлов (задания, фото) | `https://files.example.edu` |
+| `STUDENTHUB_WEB_ORIGIN` | адрес сайта журнала для заголовков `Origin` / `Referer` | `https://journal.example.edu` |
+| `STUDENTHUB_APP_KEY` | API-ключ журнала (`application_key`) | `64-символьный ключ` |
+
+```powershell
+$env:STUDENTHUB_API_BASE  = "https://api.example.edu/api/v2"
+$env:STUDENTHUB_FS_BASE   = "https://files.example.edu"
+$env:STUDENTHUB_WEB_ORIGIN = "https://journal.example.edu"
+$env:STUDENTHUB_APP_KEY   = "ВАШ_КЛЮЧ"
+python StudentHub.pyw
+```
+
+Если ничего не задано, используются домены, вшитые в SDK по умолчанию.
+
 ## 🗂 Структура проекта
 
 ```text
@@ -342,7 +363,7 @@ Issues и pull request'ы приветствуются. Если сообщае�
 
 ## 🌍 English summary
 
-**StudentHub** is an unofficial desktop client for the TOP Academy e-journal, built with PySide6. It brings your schedule, homework cards (submit work, task files, teacher photos and comments), grades with an average-score ring, group rating and profile into one window. Dark/light theme, Russian/English UI, local cache, rate-limit-aware API access (one request at a time, shared back-off on HTTP 429).
+**StudentHub** is an unofficial desktop client for your institution's e-journal, built with PySide6. It brings your schedule, homework cards (submit work, task files, teacher photos and comments), grades with an average-score ring, group rating and profile into one window. Dark/light theme, Russian/English UI, local cache, rate-limit-aware API access (one request at a time, shared back-off on HTTP 429).
 
 Your password is never stored; only a refresh token is saved locally in `%LOCALAPPDATA%\StudentHub`. There is no telemetry and no server of our own.
 
@@ -351,4 +372,4 @@ pip install -r requirements.txt
 python StudentHub.pyw          # Python 3.11–3.14
 ```
 
-Windows builds: `build_app.bat` (folder), `build_onefile.bat` (single EXE), `build_installer.bat` (installer via Inno Setup). MIT licensed. Not affiliated with TOP Academy / IT Step.
+Windows builds: `build_app.bat` (folder), `build_onefile.bat` (single EXE), `build_installer.bat` (installer via Inno Setup). MIT licensed. Not affiliated with any institution or e-journal vendor. The journal domains are configurable via `STUDENTHUB_API_BASE`, `STUDENTHUB_FS_BASE` and `STUDENTHUB_WEB_ORIGIN`.
