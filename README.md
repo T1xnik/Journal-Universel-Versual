@@ -158,8 +158,8 @@ sequenceDiagram
 Нужны **Windows** и **Python 3.11–3.14**. Из исходников приложение может запускаться и на других системах (PySide6 кроссплатформенный), но сборка рассчитана на Windows.
 
 ```bash
-git clone https://github.com/<ваш-ник>/StudentHub.git
-cd StudentHub
+git clone https://github.com/T1xnik/Journal-Universel-Versual.git
+cd Journal-Universel-Versual/StudentHub
 
 python -m venv .venv
 .venv\Scripts\activate          # Windows
@@ -179,7 +179,7 @@ python StudentHub.pyw
 | `build_onefile.bat` | один файл `dist\StudentHub-OneFile.exe` |
 | `build_installer.bat` | установщик `installer_output\StudentHub-Setup-<версия>.exe` |
 
-Скрипты сами находят Python, ставят зависимости и запускают PyInstaller. Установщик собирается в [Inno Setup 6](https://jrsoftware.org/isinfo.php) (если его нет, скрипт попробует поставить его через `winget`).
+Скрипты лежат в папке `StudentHub` и запускаются оттуда. Они сами находят Python, ставят зависимости и запускают PyInstaller. Установщик собирается в [Inno Setup 6](https://jrsoftware.org/isinfo.php) (если его нет, скрипт попробует поставить его через `winget`).
 
 **Установщик умеет:** русский и английский язык; установку для текущего пользователя без прав администратора; ярлыки в меню «Пуск» и на рабочем столе; запись в «Установка и удаление программ»; сохранение пользовательских данных при удалении.
 
@@ -214,19 +214,23 @@ python StudentHub.pyw
 ## 🗂 Структура проекта
 
 ```text
-StudentHub/
-├── StudentHub.pyw            # всё приложение (PySide6 + qasync)
-├── StudentHub.ico            # иконка
-├── requirements.txt          # зависимости
-├── vendor/                   # неофициальный SDK журнала (MIT)
-├── build_app.bat             # сборка папки с EXE (PyInstaller)
-├── build_onefile.bat         # сборка одного EXE
-├── build_installer.bat       # EXE + установщик
-├── StudentHub.spec           # спецификации PyInstaller
-├── StudentHub-OneFile.spec
-├── StudentHub-Setup.iss      # скрипт Inno Setup
-├── THIRD_PARTY_NOTICES.md    # лицензии сторонних компонентов
-└── LICENSE
+Journal-Universel-Versual/
+├── README.md                     # описание проекта
+├── LICENSE                       # MIT
+├── .gitignore
+├── .gitattributes
+└── StudentHub/                   # всё приложение здесь
+    ├── StudentHub.pyw            # всё приложение (PySide6 + qasync)
+    ├── StudentHub.ico            # иконка
+    ├── requirements.txt          # зависимости
+    ├── vendor/                   # неофициальный SDK журнала (MIT)
+    ├── build_app.bat             # сборка папки с EXE (PyInstaller)
+    ├── build_onefile.bat         # сборка одного EXE
+    ├── build_installer.bat       # EXE + установщик
+    ├── StudentHub.spec           # спецификации PyInstaller
+    ├── StudentHub-OneFile.spec
+    ├── StudentHub-Setup.iss      # скрипт Inno Setup
+    └── THIRD_PARTY_NOTICES.md    # лицензии сторонних компонентов
 ```
 
 **Внутри `StudentHub.pyw` (сверху вниз):**
