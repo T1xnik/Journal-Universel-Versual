@@ -39,6 +39,18 @@ try:
 except ImportError:
     HAS_API = False
 
+# [MOD] Свой API-ключ журнала (APP_KEY). Перекрывает ключ, вшитый в SDK, чтобы
+# не редактировать .whl вручную. Задаётся переменной окружения STUDENTHUB_APP_KEY.
+APP_KEY_OVERRIDE = os.environ.get("STUDENTHUB_APP_KEY", "").strip()
+if APP_KEY_OVERRIDE and HAS_API:
+    try:
+        import top_academy_api.config as _api_config
+        _api_config.APP_KEY = APP_KEY_OVERRIDE
+        import top_academy_api.auth as _api_auth          # AuthManager держит свою копию
+        _api_auth.APP_KEY = APP_KEY_OVERRIDE
+    except Exception:
+        pass
+
 # ### --- СЕКЦИЯ КОНФИГУРАЦИИ И ПУТЕЙ --- ###
 def app_dir() -> Path:
     if getattr(sys, "frozen", False):
